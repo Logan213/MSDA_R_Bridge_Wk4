@@ -1,0 +1,61 @@
+# **R Bridge Week 4 Assignment**
+### Logan Thomson
+
+### Loading `ggplot2`
+
+Since we are not using base R to form our plots, we need to load the ggplot2 package to make sure that our plots appear in the published R markdown file.
+
+```{r}
+library(ggplot2)
+```
+
+### Loading the Data
+Now we can load the data we want to plot.  Here, I found a .csv file of every play from every game held during the 2014 National Football League (NFL) season.  The data can be found at http://nflsavant.com/about.php
+```{r}
+nflplays <- read.csv('https://raw.githubusercontent.com/Logan213/MSDA_R_Bridge_Wk4/master/pbp-2014.csv')
+```
+
+Here we can see the first couple of rows of the data, and the first seven columns by using the square brackets after the `nflplays` object which has stored the data from the .csv file.
+```{r}
+head(nflplays[1:7])
+```
+
+Using the `summary` function, we can get a summary of the data contained in the different columns.  Since the file had so many columns for data, following is a preview of the columns containing infomation such as Yards (gained/lost on play), play formation, etc.
+```{r}
+summary(nflplays[20:25])
+```
+
+## Plotting the Data
+
+### Boxplots
+
+First, I created a series of boxplots showing the different play formations (in general, so no 2-tight end sets, etc.), and the number of yards gained or lost from that formation.  Most plays in the NFL result in zero yards, and most plays are run from the Quarterback "Under Center" formation, which is why the mean is pretty much zero for that boxplot.
+```{r, fig.width=10}
+ggplot(nflplays, aes(y = Yards, x = Formation), size=10) + geom_boxplot()
+```
+
+### Histogram
+Following is a histogram of the yards gained on every NFL play. The staggering number of plays resulting in no gain skews the plot greatly
+```{r, fig.width=10}
+qplot(Yards, data=nflplays, binwidth = 1, main='Distribution of Yards Gained')
+```
+
+We can use the `subset` function to create a different dataset that will exclude any plays resulting in no gained or lost yardage:
+```{r}
+nonzeroyds <- subset(nflplays, Yards !=0)
+```
+
+And then plot that data, setting the bin size to 1 so we can see each gain of yardage as its own bin.  Removing the zero yard plays allows us to see the rest of the data a little easier.
+```{r, fig.width=10}
+qplot(Yards, data=nonzeroyds, bin=1)
+```
+
+### Scatterplot
+
+Lastly is a scatterplot created using the "absolute" Yardline (0-100 yards on the field) versus the fixed Yardline (0-50, then designated by "Own" or "Opponent's").  Because there are so many points, this may not be the best way to present the data. However, it is intersting to look at the plot for a few reasons. 
+
+There are only a finite number of yards to gain on a play, so any play resutling in a touchdown from that yard marker will be plotted as 100-YardLine, so there is a linear plot representing all scoring plays with the offense possesing the ball. Any plots above this line are turnovers resulting in a score (fumble or interception resulting in a score).
+
+```{r, fig.width=10, fig.height=10}
+qplot(YardLine, Yards, data=nflplays, color = YardLine, main='Field Location and Length of Play')
+```
